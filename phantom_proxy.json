@@ -1,0 +1,13 @@
+{
+    /* Same as: --ignore-ssl-errors=true */
+    "ignoreSslErrors": true,
+
+    /* Same as: --max-disk-cache-size=100000 */
+    "maxDiskCacheSize": 100000,
+
+    /* Same as: --output-encoding=utf8 */
+    "outputEncoding": "utf8"
+
+    /* Same as: --local-to-remote-url-access=yes */
+    "localToRemoteUrlAccess": true
+}
