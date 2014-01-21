@@ -26,8 +26,6 @@ ENV NODE_PATH /usr/lib/node_modules
 ENV ORIGIN_HOST 192.168.8.1
 ENV ORIGIN_PORT 3000
 
-RUN unset http_proxy
-
 ADD phantom_proxy.js /phantom_proxy.js
 ADD phantom_proxy.json /phantom_proxy.json
 ADD phantom_proxy.conf /etc/init/phantom_proxy.conf
