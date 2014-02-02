@@ -23,11 +23,13 @@ RUN ln -s /phantomjs-1.9.2-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
 RUN npm install -g phantom
 
 ENV NODE_PATH /usr/lib/node_modules
-ENV ORIGIN_HOST https://ff-staging.wunderscale.com
-ENV ORIGIN_PORT 443
+ENV ORIGIN_HOST 10.19.0.1
+ENV ORIGIN_PORT 49211
+ENV PROXY_LISTEN_PORT 80
+ENV MAX_WAIT_MS 1000
 
 ADD phantom_proxy.js /phantom_proxy.js
 ADD phantom_proxy.json /phantom_proxy.json
 ADD phantom_proxy.conf /etc/init/phantom_proxy.conf
 
-CMD ["/sbin/init"]
+//#CMD ["/sbin/init"]

@@ -4,23 +4,17 @@ var sys = require('sys');
 
 phantom.create('--config=/phantom_proxy.json', function(ph){
   function requestHandler(req, res) {
-    sys.log(req.headers);
-    sys.log(req.url);
-    sys.log(req.method);
-
     var proxySettings = {
       port: process.env.ORIGIN_PORT,
       host: process.env.ORIGIN_HOST,
       url: "http://"+process.env.ORIGIN_HOST + ":" + process.env.ORIGIN_PORT + req.url
     };
 
-    sys.log(""+proxySettings.port+","+proxySettings.host+","+proxySettings.url+"");
-    
-
     var toBeProxied = (req.url == '/' && req.method == "GET");
 
     if (toBeProxied == false) {
       try {
+        sys.log("No JS Proxy Request");
         sys.log(req.connection.remoteAddress + ": " + req.method + " " + req.url);
         var request_options = { 
           hostname: proxySettings.host, 
@@ -40,6 +34,7 @@ phantom.create('--config=/phantom_proxy.json', function(ph){
             res.end();
           });
           res.writeHead(proxy_response.statusCode, proxy_response.headers);
+          sys.log("Status: "+proxy_response.statusCode);
         });
         req.addListener('data', function(chunk) {
           sys.log("proxyrequest receiving data");
@@ -53,15 +48,18 @@ phantom.create('--config=/phantom_proxy.json', function(ph){
         sys.log(exception);
       }
     } else {
+      sys.log("JS Proxy Request")
+      sys.log(req.connection.remoteAddress + ": " + req.method + " " + req.url);
       ph.createPage(function(page){
         page.set("onCallback", function() {
           sys.log("calling Back");
           page.evaluate(function() {
             return document.getElementsByTagName('html')[0].innerHTML;
           }, function(result){
-            sys.log("writing result");
             res.write(result);
             res.end();
+            sys.log("Response written")
+            sys.log((""+result+"").slice(0, 500))
             //page.close();
           });
         });
@@ -81,7 +79,7 @@ phantom.create('--config=/phantom_proxy.json', function(ph){
             var started_at = (new Date).getTime();
             var ready = function(){
               var is_ready = document.getElementsByTagName('body')[0].getAttribute("ready");
-              var time_expired = (((new Date).getTime()-started_at) > 15000);
+              var time_expired = (((new Date).getTime()-started_at) > 5000);
               if(is_ready == "true" || time_expired){
                 if(time_expired && console && console.log){
                   console.log("time expired"); 
@@ -96,13 +94,12 @@ phantom.create('--config=/phantom_proxy.json', function(ph){
         });
 
         page.open(proxySettings.url, function(status){
-          sys.log("trying to access", proxySettings.url);
-          sys.log("status:", status);
-          res.writeHead(200, {'Content-Type': 'text/html'});  
+          sys.log("PhantomJS Page.open ", proxySettings.url);
+          res.writeHead(200, {'Content-Type': 'text/html'});
         });
       });
     };
   };
      
-  http.createServer(requestHandler).listen(80);
+  http.createServer(requestHandler).listen(process.env.PROXY_LISTEN_PORT);
 });
