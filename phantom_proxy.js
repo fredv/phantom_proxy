@@ -1,6 +1,5 @@
 var phantom = require('phantom');
 var http = require('http');
-var util = require('util');
 
 phantom.create('--config=/phantom_proxy.json', function(ph){
   function requestHandler(req, res) {
@@ -14,8 +13,8 @@ phantom.create('--config=/phantom_proxy.json', function(ph){
 
     if (toBeProxied == false) {
       try {
-        util.log("No JS Proxy Request");
-        util.log(req.connection.remoteAddress + ": " + req.method + " " + req.url);
+        console.log("No JS Proxy Request");
+        console.log(req.connection.remoteAddress + ": " + req.method + " " + req.url);
         var request_options = { 
           hostname: proxySettings.host, 
           port: proxySettings.port,
@@ -26,40 +25,40 @@ phantom.create('--config=/phantom_proxy.json', function(ph){
 
         var proxy_request = http.request(request_options, function (proxy_response) {
           proxy_response.addListener('data', function(chunk) {
-            util.log("proxyresponse receiving data");
+            console.log("proxyresponse receiving data");
             res.write(chunk, 'binary');
           });
           proxy_response.addListener('end', function() {
-            util.log("proxyresponse about to end");
+            console.log("proxyresponse about to end");
             res.end();
           });
           res.writeHead(proxy_response.statusCode, proxy_response.headers);
-          util.log("Status: "+proxy_response.statusCode);
+          console.log("Status: "+proxy_response.statusCode);
         });
         req.addListener('data', function(chunk) {
-          util.log("proxyrequest receiving data");
+          console.log("proxyrequest receiving data");
           proxy_request.write(chunk, 'binary');
         });
         req.addListener('end', function() {
-          util.log("proxyrequest receiving data");
+          console.log("proxyrequest receiving data");
           proxy_request.end();
         });
       } catch (exception) {
-        util.log(exception);
+        console.log(exception);
       }
     } else {
-      util.log("JS Proxy Request")
-      util.log(req.connection.remoteAddress + ": " + req.method + " " + req.url);
+      console.log("JS Proxy Request")
+      console.log(req.connection.remoteAddress + ": " + req.method + " " + req.url);
       ph.createPage(function(page){
         page.set("onCallback", function() {
-          util.log("calling Back");
+          console.log("calling Back");
           page.evaluate(function() {
             return document.getElementsByTagName('html')[0].innerHTML;
           }, function(result){
             res.write(result);
             res.end();
-            util.log("Response written")
-            util.log((""+result+"").slice(0, 500))
+            console.log("Response written")
+            console.log((""+result+"").slice(0, 500))
             //page.close();
           });
         });
@@ -67,14 +66,14 @@ phantom.create('--config=/phantom_proxy.json', function(ph){
         page.set("onConsoleMessage", function(msg) {
           try{
             if(msg)
-              util.log("page console: " + msg);
+              console.log("page console: " + msg);
           } catch(err) {
-            util.log(err);
+            console.log(err);
           }
         });
 
         page.set("onInitialized", function() {
-          util.log("initialized");
+          console.log("initialized");
           page.evaluate(function(){
             var started_at = (new Date).getTime();
             var ready = function(){
@@ -94,7 +93,7 @@ phantom.create('--config=/phantom_proxy.json', function(ph){
         });
 
         page.open(proxySettings.url, function(status){
-          util.log("PhantomJS Page.open ", proxySettings.url);
+          console.log("PhantomJS Page.open ", proxySettings.url);
           res.writeHead(200, {'Content-Type': 'text/html'});
         });
       });
