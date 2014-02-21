@@ -1,0 +1,8 @@
+description     "system logging daemon"
+
+start on startup
+stop on runlevel [06]
+
+expect fork
+respawn
+exec rsyslogd $RSYSLOGD_OPTIONS

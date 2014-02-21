@@ -1,6 +1,8 @@
 FROM ubuntu
 
 RUN apt-get update
+RUN apt-get install -y udev
+RUN dpkg-divert --local --rename /usr/bin/ischroot && ln -sf /bin/true /usr/bin/ischroot
 RUN apt-get upgrade -y
 
 RUN apt-get install -y git-core curl build-essential openssl libssl-dev libfontconfig1-dev
@@ -24,16 +26,16 @@ RUN npm install -g phantom
 
 RUN apt-get install -y rsyslog
 
-ENV NODE_PATH /usr/lib/node_modules
-ENV ORIGIN_HOST 10.19.0.1
-ENV ORIGIN_PORT 49211
-ENV PROXY_LISTEN_PORT 80
-
 ADD phantom_proxy.js /phantom_proxy.js
 ADD phantom_proxy.json /phantom_proxy.json
 ADD phantom_proxy.conf /etc/init/phantom_proxy.conf
 
 ADD syslog_relay.conf /etc/rsyslog.conf
 ADD rsyslog.init /etc/init/rsyslog.conf
+
+ENV NODE_PATH /usr/lib/node_modules
+ENV ORIGIN_HOST 10.19.0.1
+ENV ORIGIN_PORT 49199
+ENV PROXY_LISTEN_PORT 8181
 
 CMD ["/sbin/init"]

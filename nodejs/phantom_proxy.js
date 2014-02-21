@@ -77,7 +77,7 @@ phantom.create('--config=/phantom_proxy.json', function(ph){
           page.evaluate(function(){
             var started_at = (new Date).getTime();
             var ready = function(){
-              var is_ready = document.getElementsByTagName('body')[0].getAttribute("ready");
+              var is_ready = window.$renderStaticReady;
               var time_expired = (((new Date).getTime()-started_at) > 5000);
               if(is_ready == "true" || time_expired){
                 if(time_expired && console && console.log){
